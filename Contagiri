@@ -1,0 +1,70 @@
+#include <LiquidCrystal.h>
+
+#define   TRIGGER     2
+#define   COUNTPERIOD 1000
+
+// Display LCD 1602A connections
+#define DB4   4
+#define DB5   5
+#define DB6   6
+#define DB7   7
+#define EN    11
+#define RS    12
+
+LiquidCrystal lcd(RS, EN, DB4, DB5, DB6, DB7);
+
+unsigned int count = 0;
+
+void counter();
+
+void setup() {
+  pinMode(TRIGGER, INPUT_PULLUP);
+  Serial.begin(9600);
+
+  // Display startup
+  lcd.begin(16, 2);
+  lcd.clear();
+  lcd.print("Conta Giri");
+  lcd.setCursor(0, 1);
+  lcd.print("by AT Lab");
+  delay(1000);
+
+  // Initializing the counter
+  attachInterrupt(digitalPinToInterrupt(TRIGGER), counter, FALLING);
+}
+
+void loop() {
+  count = 0;
+
+  delay(COUNTPERIOD);
+  
+  // Stop counting
+  unsigned int current_count = count;
+    
+  // Calculating the RPM value
+  unsigned int freq = 1000/COUNTPERIOD;
+  freq = freq*current_count;
+  
+  Serial.print("RPM: ");
+  Serial.println(freq*60);
+    
+  // Display RPM
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("RPM = ");
+  lcd.setCursor(6, 0);
+  lcd.print(freq*60);
+
+  //Display Frequency
+  lcd.setCursor(0, 1);
+  lcd.print("Freq = ");
+  lcd.setCursor(7, 1);
+  lcd.print(freq);
+    
+  // Reinitializing the counter
+  count = 0; 
+}
+
+void counter(){
+  count++;
+}
